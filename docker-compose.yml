@@ -1,13 +1,15 @@
 version: '3.8'
 services:
   django:
-    build: .
+    build:
+      context: .
+      dockerfile: dockerfile_django
     container_name: django
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/usr/src/app
-    ports:
-      - "8000:8000"
+    #ports:
+    #  - "8000:8000"
     restart: always
     depends_on:
       - db
@@ -24,6 +26,22 @@ services:
     networks:
       - django-dev
     restart: always
+  web:
+    build:
+      context: .
+      dockerfile: dockerfile_nginx
+    container_name: nginx
+    environment:
+      API_HOST: django
+      API_PORT: 8000
+    ports:
+      - "8080:80"
+    restart: always
+    depends_on:
+      - db
+      - django
+    networks:
+      - django-dev
 
 networks:
   django-dev:
